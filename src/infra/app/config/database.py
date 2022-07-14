@@ -13,7 +13,8 @@ class Settings(BaseSettings):
     db_name: str = Field(..., env="POSTGRES_DB")
 
     class Config:
-        env_file = "database.conf"
+        env_file = ".env"
+        env_file_encoding = "utf-8"
 
 
 settings = Settings()
