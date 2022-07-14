@@ -46,6 +46,78 @@ def read_products(
     return products
 
 
+@app.get("/products/{product_id}", response_model=ProductReadWithUser)
+def read_product(*, product_id: int, session: Session = Depends(get_session)):
+    product = session.get(Product, product_id)
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return product
+
+
+@app.patch("/products/{product_id}", response_model=ProductRead)
+def update_product(
+    *,
+    session: Session = Depends(get_session),
+    product_id: int,
+    product: ProductUpdate,
+):
+    db_product = session.get(Product, product_id)
+    if not db_product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    product_data = product.dict(exclude_unset=True)
+    for key, value in product_data.items():
+        setattr(db_product, key, value)
+    session.add(db_product)
+    session.commit()
+    session.refresh(db_product)
+    return db_product
+
+
 # User Routes
+@app.post("/users", response_model=UserRead, status_code=status.HTTP_201_CREATED)
+def create_user(*, session: Session = Depends(get_session), user: UserCreate):
+    db_user = User.from_orm(user)
+    session.add(db_user)
+    session.commit()
+    session.refresh(db_user)
+    return db_user
+
+
+@app.get("/users", response_model=List[UserRead], status_code=status.HTTP_200_OK)
+def read_users(
+    *,
+    session: Session = Depends(get_session),
+    offset: int = 0,
+    limit: int = Query(default=100, lte=100),
+):
+    users = session.exec(select(User).offset(offset).limit(limit)).all()
+    return users
+
+
+@app.get("/users/{user_id}", response_model=UserReadWithProducts)
+def read_user(*, user_id: int, session: Session = Depends(get_session)):
+    user = session.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
 
 # Order Routes
+@app.post("/orders", response_model=OrderRead, status_code=status.HTTP_201_CREATED)
+def create_order(*, session: Session = Depends(get_session), order: OrderCreate):
+    db_order = Order.from_orm(order)
+    session.add(db_order)
+    session.commit()
+    session.refresh(db_order)
+    return db_order
+
+
+@app.get("/orders", response_model=List[OrderRead], status_code=status.HTTP_200_OK)
+def read_orders(
+    *,
+    session: Session = Depends(get_session),
+    offset: int = 0,
+    limit: int = Query(default=100, lte=100),
+):
+    orders = session.exec(select(Order).offset(offset).limit(limit)).all()
+    return orders

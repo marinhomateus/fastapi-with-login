@@ -12,11 +12,13 @@ class UserBase(SQLModel):
 class User(UserBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     password: str
-    products: List["Product"] = Relationship(back_populates="products")
+    
+    products: List["Product"] = Relationship(back_populates="user")
+    orders: List["Order"] = Relationship(back_populates="user")
 
 
 class UserCreate(UserBase):
-    pass
+    password: str
 
 
 class UserRead(UserBase):
@@ -25,8 +27,8 @@ class UserRead(UserBase):
 
 class UserUpdate(SQLModel):
     id: Optional[int] = None
-    name: str
-    phone_number: str
+    name: Optional[str] = None
+    phone_number: Optional[str] = None
 
 
 class ProductBase(SQLModel):
@@ -39,7 +41,8 @@ class ProductBase(SQLModel):
 
 class Product(ProductBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    user: Optional[User] = Relationship(back_populates="user")
+
+    user: Optional[User] = Relationship(back_populates="products")
 
 
 class ProductCreate(ProductBase):
@@ -51,9 +54,11 @@ class ProductRead(ProductBase):
 
 
 class ProductUpdate(SQLModel):
-    id: Optional[int] = None
-    name: str
-    phone_number: str
+    name: Optional[str] = None
+    description: Optional[str] = None
+    price: Optional[float] = None
+    available: bool = False
+    user_id: Optional[int] = None
 
 
 class OrderBase(SQLModel):
@@ -61,14 +66,16 @@ class OrderBase(SQLModel):
     delivery_location: Optional[str]
     delivery_type: str
     description: Optional[str] = "Sem observações"
+
     user_id: Optional[int] = Field(default=None, foreign_key="user.id")
     product_id: Optional[int] = Field(default=None, foreign_key="product.id")
 
 
 class Order(OrderBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    user: Optional[User] = Relationship(back_populates="user")
-    product: Optional[Product] = Relationship(back_populates="product")
+
+    user: Optional[User] = Relationship(back_populates="orders")
+    product: Optional[Product] = Relationship(back_populates="orders")
 
 
 class OrderCreate(OrderBase):
@@ -80,9 +87,20 @@ class OrderRead(OrderBase):
 
 
 class OrderUpdate(SQLModel):
-    id: Optional[int] = None
-    name: str
-    phone_number: str
+    quantity: Optional[int] = None
+    delivery_location: Optional[str] = None
+    delivery_type: Optional[str] = None
+    description: Optional[str] = None
+    user_id: Optional[int] = None
+    product_id: Optional[int] = None
+
+
+class ProductReadWithUser(ProductRead):
+    user: Optional[UserRead] = None
+
+
+class UserReadWithProducts(UserRead):
+    products: List[ProductRead] = []
 
 
 ##   Schemas   ##
