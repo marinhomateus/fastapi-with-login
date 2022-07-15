@@ -8,8 +8,13 @@ fastapi = "*"
 uvicorn = {extras = ["standard"], version = "*"}
 sqlmodel = "*"
 psycopg2-binary = "*"
+sqlalchemy = "==1.4.35"
 
 [dev-packages]
+black = "*"
 
 [requires]
 python_version = "3.9"
+
+[pipenv]
+allow_prereleases = true

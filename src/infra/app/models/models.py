@@ -12,7 +12,7 @@ class UserBase(SQLModel):
 class User(UserBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     password: str
-    
+
     products: List["Product"] = Relationship(back_populates="user")
     orders: List["Order"] = Relationship(back_populates="user")
 
@@ -75,7 +75,7 @@ class Order(OrderBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
 
     user: Optional[User] = Relationship(back_populates="orders")
-    product: Optional[Product] = Relationship(back_populates="orders")
+    # product: Optional[Product] = Relationship(back_populates="orders")
 
 
 class OrderCreate(OrderBase):
